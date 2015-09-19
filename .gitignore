@@ -1,0 +1,5 @@
+/.tern-port
+*.json
+*.xml
+/node_modules/
+/secret.js
