@@ -157,11 +157,16 @@ function parseRecrrentEvent(res, orgTitle, rrule, dtstart, dtend) {
   
 }
 
-request(secret[0].src, function(error, response, body) {
-  if (error) throw (error);
+var getICS = function(src){
+  request(src, function(error, response, body) {
+    if (error) throw (error);
+    parseData(body);
+  });
+};
 
+var parseData = function(icsData){
   var res = '';
-  var ical = icalendar.parse_calendar(body);
+  var ical = icalendar.parse_calendar(icsData);
 
   ical.events().forEach(function(item) {
     
@@ -174,8 +179,8 @@ request(secret[0].src, function(error, response, body) {
     var recurrence_id = props['RECURRENCE-ID'];
 
     if (rrule) {
-
-      res += parseRecrrentEvent(res, orgTitle, rrule, dtstart, dtend);
+      console.log(rrule);
+      res = parseRecrrentEvent(res, orgTitle, rrule, dtstart, dtend);
 
     } else {
 
@@ -190,19 +195,20 @@ request(secret[0].src, function(error, response, body) {
       } else {
         //res += orgTitle + '  this is recurring\n';
       }
-      
     }
   });
   saveOrgFile(res);
-});
-// };
+};
 
 var saveOrgFile = function(dataStr) {
-  fs.writeFile('doodle.org' /*resource.targ*/ , dataStr, function() {
-    // console.log('mutherfucking complete : ', secret.length);
-    // if (secret.length > 0) {
-    //   resource = secret.pop();
-    //   getXML(resource.src);
-    // }
+  fs.writeFile(resource.targ , dataStr, function() {
+    console.log('complete : ', secret.length);
+    if (secret.length > 0) {
+      resource = secret.pop();
+      getICS(resource.src);
+    }
   });
 };
+
+var resource = secret.pop();
+getICS(resource.src);
